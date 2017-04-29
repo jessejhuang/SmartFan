@@ -29,7 +29,7 @@ var timeOnLoad;
 var simpleCustomService       = "208c9c6f-dcf8-4c1f-8a43-8f1674c21d6e";
 var fanChangeCharacteristic = "a7360086-35eb-405e-8fa9-5060fc4f60e8";
 var oledDisplayCharacteristic = "de356095-f965-4a5f-9418-41a48ea6718d";
-
+var temperatureCharacteristic = "bd4cf86c-f315-4864-9c89-8fb5d01463cf"
 var graphData = [["Time", "Temperature"]];
 // *********   Functions for scanning and scan related events
 
@@ -208,6 +208,12 @@ function OffFan(){
 function readTemperature(){
   console.log("Reading temperature() called");
   var tempAndTime = ble.read(connectingDevice.id, simpleCustomService, temperatureCharacteristic, success, failure);
+  console.log("READING TEMP AND TIME:")
+  console.log(tempAndTime);
+  // var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
+  // graphData.push([timeElapsed, temp_f]);
+  // drawChart(graphData);
+  // console.log(graphData);
 }
 
 
@@ -275,7 +281,7 @@ function deviceConnectionSuccess(device) {
     connectingDevice = device;
     startTime();
     timeOnLoad = new Date().getTime();
-    var plotGraph = setInterval(getTemperature,5000);
+    var plotGraph = setInterval(readTemperature,5000);
     // Studio 11:  Now that the device is connected, request any data that's needed
 //    readButton();
     // Set up a timer to repeatedly "poll" for data.
@@ -376,26 +382,57 @@ console.log("loaded index.js");
 
 jQuery(document).ready(function($) {
   timeOnLoad = new Date().getTime();
-  var plotGraph = setInterval(getTemperature,5000);
+  var plotGraph = setInterval(readTemperature,5000);
 });
 
 //Make an AJAX request to get the temperature from the wunderground API, and graph the result using google charts.
 //In addition, send the current temperature to the redbear duo.
-function getTemperature(){
-  $.ajax({
-  url : "http://api.wunderground.com/api/335bb8c77510bffb/geolookup/conditions/q/MO/St_Louis.json",
-  dataType : "jsonp",
-  success : function(parsed_json) {
-  var location = parsed_json['location']['city'];
-  var temp_f = parsed_json['current_observation']['temp_f'];
-  var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
-  graphData.push([timeElapsed, temp_f]);
-  drawChart(graphData);
-  console.log(graphData);
-  var tempArray= new Uint8Array(1)
-  tempArray[0] = temp_f;
-  ble.write(connectingDevice.id, simpleCustomService, oledDisplayCharacteristic, tempArray.buffer, success, failure);
-  }
-  });
-
-}
+// function getTemperature(){
+//   console.log("START GET TEMPERATURE");
+//   $.ajax({
+//   url : "https://api.wunderground.com/api/335bb8c77510bffb/geolookup/conditions/q/MO/St_Louis.json",
+//   dataType : "jsonp",
+//   success : function(parsed_json) {
+//   var location = parsed_json['location']['city'];
+//   var temp_f = parsed_json['current_observation']['temp_f'];
+//   var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
+//   graphData.push([timeElapsed, temp_f]);
+//   drawChart(graphData);
+//   console.log(graphData);
+//   var tempArray= new Uint8Array(1)
+//   tempArray[0] = temp_f;
+//   ble.write(connectingDevice.id, simpleCustomService, oledDisplayCharacteristic, tempArray.buffer, success, failure);
+//   }
+// },
+// error: function (request, status, error) {
+//         alert(request.responseText);
+//     }
+// );
+//   // var xhr = new XMLHttpRequest();
+//   // xhr.onreadystatechange = function(){
+//   //   if(xhr.readyState ===XMLHttpRequest.DONE){
+//   //     if (xmlhttp.status == 200) {
+//   //           var parsed_json = xhr.responseText;
+//   //           var location = parsed_json['location']['city'];
+//   //           var temp_f = parsed_json['current_observation']['temp_f'];
+//   //           var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
+//   //           graphData.push([timeElapsed, temp_f]);
+//   //           drawChart(graphData);
+//   //           console.log(graphData);
+//   //           var tempArray= new Uint8Array(1)
+//   //           tempArray[0] = temp_f;
+//   //           ble.write(connectingDevice.id, simpleCustomService, oledDisplayCharacteristic, tempArray.buffer, success, failure);
+//   //          }
+//   //          else if (xmlhttp.status == 400) {
+//   //             alert('There was an error 400');
+//   //          }
+//   //          else {
+//   //              console.log('Request failed.  Returned status of ' + xhr.status);
+//   //          }
+//   //
+//   //   }
+//   //   xhr.open('GET', "https://api.wunderground.com/api/335bb8c77510bffb/geolookup/conditions/q/MO/St_Louis.json");
+//   //   xhr.send();
+//   //}
+//   console.log("STOP GET TEMPERATURE");
+// }
