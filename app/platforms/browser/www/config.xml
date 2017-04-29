@@ -6,9 +6,9 @@
     <feature name="Device">
         <param name="browser-package" value="Device" />
     </feature>
-    <name>BLE Basic</name>
+    <name>Duo Fan</name>
     <description>
-        A basic BLE Scanner.
+        A smart fan
     </description>
     <author email="" href="http://phonegap.com">
     </author>

@@ -18,16 +18,19 @@ var connectingDevice = null;
 var connectionTimeout = null;
 
 var offsetValue = 2;
-var alarmTime = new Date("April 12, 2017 00:00:00").getTime();
-var countDownTime = new Date("April 12, 2017 00:00:00").getTime();
+var alarmTime = new Date("April 29, 2017 00:00:00").getTime();
+var countDownTime = new Date("April 29, 2017 00:00:00").getTime();
 var alarmCountDown;
 var alarmOn;
 var countDownOn;
 var timerCountDown;
+var timeOnLoad;
 
 var simpleCustomService       = "208c9c6f-dcf8-4c1f-8a43-8f1674c21d6e";
-var colorChangeCharacteristic = "a7360086-35eb-405e-8fa9-5060fc4f60e8";
+var fanChangeCharacteristic = "a7360086-35eb-405e-8fa9-5060fc4f60e8";
+var oledDisplayCharacteristic = "de356095-f965-4a5f-9418-41a48ea6718d";
 
+var graphData = [["Time", "Temperature"]];
 // *********   Functions for scanning and scan related events
 
 
@@ -80,7 +83,7 @@ function setTimeAlarm(){
     alarmOn.setHours(alarmOn.getHours()+hour);
     alarmOn.setMinutes(alarmOn.getMinutes()+minute);
     alarmOn.setSeconds(alarmOn.getSeconds()+second);
-    
+
     var h_on = checkTime(alarmOn.getHours());
     var m_on = checkTime(alarmOn.getMinutes());
     var s_on = checkTime(alarmOn.getSeconds());
@@ -108,12 +111,12 @@ function alarmOnTime(){
     var mm = checkTime(minutes);
     var ss = checkTime(seconds);
     document.getElementById("countDownAlarmDisplay").innerHTML = "Count Down to Turn On @ " + hh + "h " + mm + "m " + ss + "s ";
-    
-    // If the count down is over, write some text 
+
+    // If the count down is over, write some text
     if (distance < 0) {
         clearInterval(alarmCountDown);
         document.getElementById("countDownAlarmDisplay").innerHTML = "TIME EXPIRED & Light On";
-        FadeColorOn();
+        //FadeColorOn(); <- Change to temperature
     }
 }, 1000);
 
@@ -131,12 +134,13 @@ function alarmOffTime(){
     var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
     var seconds = Math.floor((distance % (1000 * 60)) / 1000);
     document.getElementById("countDownAlarmDisplay").innerHTML = "Count Down to Turn Off @ " + hours + "h " + minutes + "m " + seconds + "s ";
-    
-    // If the count down is over, write some text 
+
+    // If the count down is over, write some text
     if (distance < 0) {
         clearInterval(alarmCountDown);
         document.getElementById("countDownAlarmDisplay").innerHTML = "TIME EXPIRED & Light Off";
-        FadeColorOff();
+        //FadeColorOff(); <- Change to temperature
+
     }
 }, 1000);
 
@@ -152,8 +156,8 @@ function onInNTime(){
     var seconds = Math.floor((distance % (1000 * 60)) / 1000);
     var ss = seconds;
     document.getElementById("countDownSecondDisplay").innerHTML = "Turn on @" + ss + "s ";
-    
-    // If the count down is over, write some text 
+
+    // If the count down is over, write some text
     if (distance < 0) {
         clearInterval(timerCountDown);
         document.getElementById("countDownSecondDisplay").innerHTML = "TIME EXPIRED & Light On";
@@ -172,86 +176,38 @@ function offInNTime(){
     var seconds = Math.floor((distance % (1000 * 60)) / 1000);
     var ss = seconds;
     document.getElementById("countDownSecondDisplay").innerHTML = "Turn off @" + ss + "s ";
-    
-    // If the count down is over, write some text 
+
+    // If the count down is over, write some text
     if (distance < 0) {
         clearInterval(timerCountDown);
         document.getElementById("countDownSecondDisplay").innerHTML = "TIME EXPIRED & Light Off";
         FadeColorOff();
     }
 }, 1000);
-    
+
 }
 
 
 
 //all the commands on turn ON/OFF lamp
-function OnLight(){
+function OnFan(){
     console.log("Function ONLIGHT() called");
     var onArray= new Uint8Array(1);
     onArray[0] = 188;
     //onArray[1] = 12;
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, onArray.buffer, success, failure);
+    ble.write(connectingDevice.id, simpleCustomService, fanChangeCharacteristic, onArray.buffer, success, failure);
 }
-function OffLight(){
+function OffFan(){
     console.log("Function OFFLIGHT() called");
     var onArray= new Uint8Array(1);
     onArray[0] = 189;
     //onArray[1] = 12;
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, onArray.buffer, success, failure);
+    ble.write(connectingDevice.id, simpleCustomService, fanChangeCharacteristic, onArray.buffer, success, failure);
 }
 
-function FadeColorOn(){
-    console.log("Function FadeColor() called");
-    var fadeOnData= new Uint8Array(1);
-    fadeOnData[0] = 170;
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, fadeOnData.buffer, success, failure);
-}
-function FadeColorOff(){
-    console.log("Function FadeColorO () called");
-    var fadeOffData= new Uint8Array(1);
-    fadeOffData[0] = 187;
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, fadeOffData.buffer, success, failure);
-}
-
-
-// change the default color 
-function ChangeColor(){
-    var data= new Uint8Array(4);
-    data[0] = 171;
-    var display_red = parseInt(document.getElementById("setRedColor").value);
-    var display_green = parseInt(document.getElementById("setGreenColor").value);
-    var display_blue = parseInt(document.getElementById("setBlueColor").value);
-
-    var red = parseInt(document.getElementById("setRedColor").value * 255/100);
-    var green = parseInt(document.getElementById("setGreenColor").value * 255/100);
-    var blue = parseInt(document.getElementById("setBlueColor").value * 255/100);
-    data[1] = red;
-    data[2] = green;
-    data[3] = blue;
-    console.log("Function CHANGECOLOR() called");
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, data.buffer, success, failure);
-
-    document.getElementById("displayRed").innerHTML = display_red;
-    document.getElementById("displayGreen").innerHTML = display_green;
-    document.getElementById("displayBlue").innerHTML = display_blue;
-}
-
-// change the default color and turn on the lamp
-function ChangeToNewColor(){
-    var data= new Uint8Array(4);
-    data[0] = 171;
-    var red = parseInt(document.getElementById("setRedColor").value * 255/100);
-    var green = parseInt(document.getElementById("setGreenColor").value * 255/100);
-    var blue = parseInt(document.getElementById("setBlueColor").value * 255/100);
-    data[1] = red;
-    data[2] = green;
-    data[3] = blue;
-    console.log("Function CHANGECOLOR() called");
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, data.buffer, success, failure);
-    var fadeOnData= new Uint8Array(1);
-    fadeOnData[0] = 170;
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, fadeOnData.buffer, success, failure);
+function readTemperature(){
+  console.log("Reading temperature() called");
+  var tempAndTime = ble.read(connectingDevice.id, simpleCustomService, temperatureCharacteristic, success, failure);
 }
 
 
@@ -310,29 +266,6 @@ function startScan() {
     // Re-enable the window when scan done
     setTimeout(scanStop, SCAN_TIME);
 }
-
-
-// var messageCounter = 0;
-
-// ***** Button Related Functions ********
-// function buttonData(buffer) {
-//     var array = new Uint8Array(buffer)
-//     var buttonValue = document.getElementById("buttonValue");
-//     buttonValue.checked =  (array[0] != 0);
-//     messageCounter++;
-
-//     console.log("Total Messages: " + messageCounter);
-// }
-
-// function buttonDataFailed() {
-//     console.log("Button Read Failed");
-// }
-
-// function readButton() {
-//     ble.read(connectingDevice.id, buttonService, buttonCharacteristic, buttonData, buttonDataFailed);
-// }
-
-
 
 // ********   Functions for device connection related events
 
@@ -428,7 +361,7 @@ document.addEventListener('init', function(event) {
     if (page.id === 'deviceDetails') {
         // Enable the modal window
         connectingModal = document.getElementById('connectingModal');
-        connectingModal.show();
+        //connectingModal.show();
 
         // Update the page's title bar
         page.querySelector('ons-toolbar .center').innerHTML = "Device Details";
@@ -439,3 +372,26 @@ document.addEventListener('init', function(event) {
     }
 });
 console.log("loaded index.js");
+
+jQuery(document).ready(function($) {
+  timeOnLoad = new Date().getTime();
+  var plotGraph = setInterval(getTemperature,5000);
+});
+function getTemperature(){
+  $.ajax({
+  url : "http://api.wunderground.com/api/335bb8c77510bffb/geolookup/conditions/q/MO/St_Louis.json",
+  dataType : "jsonp",
+  success : function(parsed_json) {
+  var location = parsed_json['location']['city'];
+  var temp_f = parsed_json['current_observation']['temp_f'];
+  var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
+  graphData.push([timeElapsed, temp_f]);
+  drawChart(graphData);
+  console.log(graphData);
+  var tempArray= new Uint8Array(1)
+  tempArray[0] = temp_f;
+  ble.write(connectingDevice.id, simpleCustomService, oledDisplayCharacteristic, tempArray.buffer, success, failure);
+  }
+  });
+
+}

@@ -118,6 +118,7 @@ void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason r
          commands[i] = int(value[i]);
          toggleFan ++;
          changeFanState(toggleFan);
+         currentTemperature = commands[0];
        }
 
      }
@@ -153,3 +154,4 @@ void changeFanState(int onOff){
     //display.end();
   }
 }
+

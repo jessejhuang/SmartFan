@@ -6,10 +6,12 @@
 <head>
     <meta charset="utf-8">
     <!--  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width"> -->
+
     <link rel="stylesheet" href="lib/onsen/css/onsenui.css"/>
     <link rel="stylesheet" href="lib/onsen/css/onsen-css-components.css"/>
     <link rel="stylesheet" href="css/index.css"/>
     <script src="lib/onsen/js/onsenui.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
 <!-- Uncommenting the lines below can enable / disable the Android Style -->
     <!--
         <script>
@@ -17,7 +19,12 @@
         </script>
     <!-- -->
     <script type="text/javascript" src="cordova.js"></script>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="js/chart.js"></script>
+
     <script type="text/javascript" src="js/index.js"></script>
+
     <title>Basic BLE</title>
 </head>
 <body>
@@ -71,81 +78,31 @@
 
         <div class="centered" style="text-align:center; ">
             <ons-list>
-                <ons-list-header>Lamp App</ons-list-header>
-
-    <ons-list-item style="display:initial">
-    <p style="margin-top: 30px; text-align: center; display:initial;">ON/OFF Immediately</p> 
+                <ons-list-header>Smart Fan</ons-list-header>
     <ons-row>
-        <ons-col>
-        <p style="margin-top: 25px; text-align: center">
-            <ons-button onclick="OnLight()">ON</ons-button>
-        </p>
-        </ons-col>
-        <ons-col>
-        <p style="margin-top: 25px; text-align: center">
-            <ons-button onclick="OffLight()">OFF</ons-button>
-        </p>
-        </ons-col>
+      <div id="chart_div"></div>
     </ons-row>
-    <p style="margin-top: 30px; text-align: center; display:initial;">ON/OFF Fading</p>
+    <ons-list-item style="display:initial">
+    <p style="margin-top: 30px; text-align: center; display:initial;">ON/OFF Immediately</p>
     <ons-row>
         <ons-col>
-        <p style="margin-top: 20px; text-align: center">
-            <ons-button onclick="FadeColorOn()">Fade On</ons-button> 
+        <p style="margin-top: 25px; text-align: center">
+            <ons-button onclick="OnFan()">ON</ons-button>
         </p>
         </ons-col>
         <ons-col>
-        <p style="margin-top: 20px; text-align: center">
-            <ons-button onclick="FadeColorOff()">Fade Off</ons-button>
+        <p style="margin-top: 25px; text-align: center">
+            <ons-button onclick="OffFan()">OFF</ons-button>
         </p>
         </ons-col>
     </ons-row>
     </ons-list-item>
 
-    <ons-list-item>
-        <p style="margin-top: 30px; text-align: center; display:initial;" id="defaultColorTable"> Default Color </p>
-
-          <ons-row>
-            <ons-col>Red(%)</ons-col>
-            <ons-col>Green(%)</ons-col>
-            <ons-col>Blue(%)</ons-col>
-          </ons-row>
-          <ons-row>
-            <ons-col id="displayRed">
-            100
-            </ons-col>
-            <ons-col id="displayGreen">
-            100
-            </ons-col>
-            <ons-col id="displayBlue">
-            100  
-            </ons-col>
-          </ons-row>
-
-
-        <p style="margin-top: 25px; text-align: center; display:initial;" > Change Default Color </p>
-        <ons-row>
-            <ons-input type="number" id="setRedColor" modifier="underbar" placeholder="Set Default Red " int></ons-input> % 
-        </ons-row>
-        <ons-row>
-            <ons-input type="number" id="setGreenColor" modifier="underbar" placeholder="Set Default Green " int></ons-input> %
-        </ons-row>
-        <ons-row>
-            <ons-input type="number" id="setBlueColor" modifier="underbar" placeholder="Set Default Blue " int ></ons-input> %
-        </ons-row>
-        <ons-row>
-            <ons-col>
-                <ons-button onclick="ChangeColor()">Change Color</ons-button>
-            </ons-col>
-            <ons-col>
-                <ons-button onclick="ChangeToNewColor()"> To New Color</ons-button>
-            </ons-col>
-                </ons-list-item>
                 <ons-list-item>
 
         <p style="margin-top: 25px; text-align: center; display:initial;" >
          <ons-row>
-          <ons-input type="number" id="countDownSecond" modifier="underbar" placeholder="Count Down In" int></ons-input> second 
+          <ons-input type="number" id="countDownSecond" modifier="underbar" placeholder="Count Down In" int></ons-input> second
          </ons-row>
          <ons-row id="countDownSecondDisplay">
          </ons-row>
@@ -175,7 +132,7 @@
                 <ons-input type="number" id="setHour" modifier="underbar"   placeholder="HH" int></ons-input> hr
                 </ons-row>
                 <ons-row>
-                <ons-input type="number" id="setMinute" modifier="underbar" placeholder="MM" int></ons-input> min 
+                <ons-input type="number" id="setMinute" modifier="underbar" placeholder="MM" int></ons-input> min
                 </ons-row>
                 <ons-row>
                 <ons-input type="number" id="setSecond" modifier="underbar" placeholder="SS" int></ons-input> s

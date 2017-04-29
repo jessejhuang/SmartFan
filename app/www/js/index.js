@@ -27,8 +27,8 @@ var timerCountDown;
 var timeOnLoad;
 
 var simpleCustomService       = "208c9c6f-dcf8-4c1f-8a43-8f1674c21d6e";
-var colorChangeCharacteristic = "a7360086-35eb-405e-8fa9-5060fc4f60e8";
-
+var fanChangeCharacteristic = "a7360086-35eb-405e-8fa9-5060fc4f60e8";
+var oledDisplayCharacteristic = "de356095-f965-4a5f-9418-41a48ea6718d";
 
 var graphData = [["Time", "Temperature"]];
 // *********   Functions for scanning and scan related events
@@ -195,14 +195,14 @@ function OnFan(){
     var onArray= new Uint8Array(1);
     onArray[0] = 188;
     //onArray[1] = 12;
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, onArray.buffer, success, failure);
+    ble.write(connectingDevice.id, simpleCustomService, fanChangeCharacteristic, onArray.buffer, success, failure);
 }
 function OffFan(){
     console.log("Function OFFLIGHT() called");
     var onArray= new Uint8Array(1);
     onArray[0] = 189;
     //onArray[1] = 12;
-    ble.write(connectingDevice.id, simpleCustomService, colorChangeCharacteristic, onArray.buffer, success, failure);
+    ble.write(connectingDevice.id, simpleCustomService, fanChangeCharacteristic, onArray.buffer, success, failure);
 }
 
 function readTemperature(){
@@ -361,7 +361,7 @@ document.addEventListener('init', function(event) {
     if (page.id === 'deviceDetails') {
         // Enable the modal window
         connectingModal = document.getElementById('connectingModal');
-        connectingModal.show();
+        //connectingModal.show();
 
         // Update the page's title bar
         page.querySelector('ons-toolbar .center').innerHTML = "Device Details";
@@ -389,8 +389,8 @@ function getTemperature(){
   drawChart(graphData);
   console.log(graphData);
   var tempArray= new Uint8Array(1)
-  tempArray[0] = 10 * temp_f;
-  ble.write(connectingDevice.id, simpleCustomService, temperatureCharacteristic, tempArray.buffer, success, failure);
+  tempArray[0] = temp_f;
+  ble.write(connectingDevice.id, simpleCustomService, oledDisplayCharacteristic, tempArray.buffer, success, failure);
   }
   });
 
