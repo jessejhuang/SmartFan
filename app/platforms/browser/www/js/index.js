@@ -166,7 +166,13 @@ function OffFan(){
 
 function readTemperature(){
   console.log("Reading temperature() called");
-  var tempAndTime = ble.read(connectingDevice.id, simpleCustomService, temperatureCharacteristic, success, failure);
+  ble.read(connectingDevice.id, simpleCustomService, temperatureCharacteristic, readTempKernel, failure);
+
+  // console.log(graphData);
+}
+
+function readTempKernel(buffer){
+  var tempAndTime = new Uint8Array(buffer);
   console.log("READING TEMP AND TIME:")
   console.log(tempAndTime);
   var temp_read = 0;
@@ -178,7 +184,6 @@ function readTemperature(){
   var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
   graphData.push([timeElapsed, temp_read]);
   drawChart(graphData);
-  // console.log(graphData);
 }
 
 function changeStrength(){
