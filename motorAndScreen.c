@@ -3,7 +3,7 @@
 #include <Adafruit_SSD1306.h>
 #include <DuoBLE.h>
 
-const int OLED_CLK   = D0;
+const int OLED_CLK   = D5;
 const int OLED_MOSI  = D1;
 const int OLED_RESET = D2;
 const int OLED_DC    = D3;
@@ -44,7 +44,7 @@ Timer motorTimer(360, rotateFan);
 
 void setup() {
   delay(2000);
-  //display.begin(SSD1306_SWITCHCAPVCC);
+  display.begin(SSD1306_SWITCHCAPVCC);
   Serial.begin(9600);
   servo.attach( D0 );
 
@@ -77,12 +77,7 @@ void setup() {
 }
 
 void loop() {
-  //delay(8000);
-  //changeFanState(0);
-  //printOnScreen (823);
-  //delay(8000);
-  //changeFanState(1);
-  //printOnScreen (998);
+
 }
 
 //Displays the current temperature on the OLED screen.
@@ -120,7 +115,6 @@ void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason r
          commands[i] = int(value[i]);
          toggleFan ++;
          changeFanState(toggleFan);
-         currentTemperature = commands[0];
        }
 
      }
@@ -141,6 +135,8 @@ void oledChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason 
          Serial.print(" ");
          commands[i] = int(value[i]);
        }
+       printOnScreen(commands[0]);
+       
 
      }
      Serial.println();
@@ -150,12 +146,11 @@ void oledChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason 
 //Each call to chance the fan will also control whether the LED screen displays the temperature- the display will not turn on while the fan is running.
 void changeFanState(int onOff){
   if (onOff % 2 == 0){
+    Serial.println("Fan is turn off");
     motorTimer.stop();
-    //printOnScreen(currentTemperature);
   }
   else{
     motorTimer.start();
-    //display.clearDisplay();
-    //display.end();
+    Serial.println("Fan is turn on");
   }
 }
