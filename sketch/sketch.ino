@@ -85,6 +85,7 @@ void loop() {
   //printOnScreen (998);
 }
 
+//Displays the current temperature on the OLED screen. 
 void printOnScreen(int temperature){
   currentTemperature = temperature;
   if (temperature == -1111){
@@ -104,6 +105,7 @@ void printOnScreen(int temperature){
   }
 }
 
+//Callback to change the fan from on too off or vice versa once a value has been written. 
 void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason reason){
    Serial.print("Fan Change Characteristic; Reason: ");
    Serial.println(reason);
@@ -125,6 +127,7 @@ void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason r
      Serial.println();
 }
 
+//Callback to print the current temperature, gotten from the weather api, on screen
 void oledChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason reason){
    Serial.print("OLED Change Characteristic; Reason: ");
    Serial.println(reason);
@@ -143,6 +146,8 @@ void oledChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason 
      Serial.println();
 }
 
+
+//Each call to chance the fan will also control whether the LED screen displays the temperature- the display will not turn on while the fan is running. 
 void changeFanState(int onOff){
   if (onOff % 2 == 0){
     motorTimer.stop();

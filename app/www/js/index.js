@@ -161,7 +161,7 @@ function onInNTime(){
     if (distance < 0) {
         clearInterval(timerCountDown);
         document.getElementById("countDownSecondDisplay").innerHTML = "TIME EXPIRED & Light On";
-        FadeColorOn();
+        OnFan();
     }
 }, 1000);
 
@@ -181,7 +181,7 @@ function offInNTime(){
     if (distance < 0) {
         clearInterval(timerCountDown);
         document.getElementById("countDownSecondDisplay").innerHTML = "TIME EXPIRED & Light Off";
-        FadeColorOff();
+        OffFan();
     }
 }, 1000);
 
@@ -377,6 +377,9 @@ jQuery(document).ready(function($) {
   timeOnLoad = new Date().getTime();
   var plotGraph = setInterval(getTemperature,5000);
 });
+
+//Make an AJAX request to get the temperature from the wunderground API, and graph the result using google charts.
+//In addition, send the current temperature to the redbear duo.
 function getTemperature(){
   $.ajax({
   url : "http://api.wunderground.com/api/335bb8c77510bffb/geolookup/conditions/q/MO/St_Louis.json",
