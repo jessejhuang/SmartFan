@@ -274,7 +274,8 @@ function deviceConnectionSuccess(device) {
     connectingModal.hide();
     connectingDevice = device;
     startTime();
-
+    timeOnLoad = new Date().getTime();
+    var plotGraph = setInterval(getTemperature,5000);
     // Studio 11:  Now that the device is connected, request any data that's needed
 //    readButton();
     // Set up a timer to repeatedly "poll" for data.
