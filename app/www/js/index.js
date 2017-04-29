@@ -169,9 +169,15 @@ function readTemperature(){
   var tempAndTime = ble.read(connectingDevice.id, simpleCustomService, temperatureCharacteristic, success, failure);
   console.log("READING TEMP AND TIME:")
   console.log(tempAndTime);
-  // var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
-  // graphData.push([timeElapsed, temp_f]);
-  // drawChart(graphData);
+  var temp_read = 0;
+  for(var i = 0; i < tempAndTime.length; i++){
+    temp_read += tempAndTime[i];
+  }
+  temp_read = temp_read/10;
+
+  var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
+  graphData.push([timeElapsed, temp_read]);
+  drawChart(graphData);
   // console.log(graphData);
 }
 
@@ -189,7 +195,7 @@ function changeTargetTime(){
     var targetTemperature = parseFloat(document.getElementById("targetTemp").value);
     var onArray= targetTemperature.split(".");
     for(var i = 0; i < onArray.length; i++){
-        
+
     }
     var intValue = praseInt (targetTemperature);
     console.log (intValue);
@@ -198,7 +204,7 @@ function changeTargetTime(){
 
     onArray[0] = intValue;
     onArray[1] = intValue ;
-    
+
 
     ble.write(connectingDevice.id, simpleCustomService, targetTempCharacteristic, onArray.buffer, success, failure);
 }

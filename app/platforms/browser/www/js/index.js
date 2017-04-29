@@ -28,8 +28,9 @@ var timeOnLoad;
 
 var simpleCustomService       = "208c9c6f-dcf8-4c1f-8a43-8f1674c21d6e";
 var fanChangeCharacteristic = "a7360086-35eb-405e-8fa9-5060fc4f60e8";
-var oledDisplayCharacteristic = "de356095-f965-4a5f-9418-41a48ea6718d";
-var temperatureCharacteristic = "bd4cf86c-f315-4864-9c89-8fb5d01463cf"
+var targetTempCharacteristic = "de356095-f965-4a5f-9418-41a48ea6718d";
+var temperatureCharacteristic = "bd4cf86c-f315-4864-9c89-8fb5d01463cf";
+var rotationStrengthCharacteristic = "11c4156d-2bbb-4c52-8dc0-722d789d8e5a";
 var graphData = [["Time", "Temperature"]];
 // *********   Functions for scanning and scan related events
 
@@ -146,48 +147,6 @@ function alarmOffTime(){
 
 }
 
-// timer to count down in second to turn on/off the lamp when time is up
-function onInNTime(){
-    setTimeCountDown();
-    clearInterval(timerCountDown);
-    timerCountDown = setInterval(function() {
-    var now = new Date().getTime();
-    var distance = countDownOn - now;
-    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    var ss = seconds;
-    document.getElementById("countDownSecondDisplay").innerHTML = "Turn on @" + ss + "s ";
-
-    // If the count down is over, write some text
-    if (distance < 0) {
-        clearInterval(timerCountDown);
-        document.getElementById("countDownSecondDisplay").innerHTML = "TIME EXPIRED & Light On";
-        OnFan();
-    }
-}, 1000);
-
-}
-
-function offInNTime(){
-    setTimeCountDown();
-    clearInterval(timerCountDown);
-    timerCountDown = setInterval(function() {
-    var now = new Date().getTime();
-    var distance = countDownOn - now;
-    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    var ss = seconds;
-    document.getElementById("countDownSecondDisplay").innerHTML = "Turn off @" + ss + "s ";
-
-    // If the count down is over, write some text
-    if (distance < 0) {
-        clearInterval(timerCountDown);
-        document.getElementById("countDownSecondDisplay").innerHTML = "TIME EXPIRED & Light Off";
-        OffFan();
-    }
-}, 1000);
-
-}
-
-
 
 //all the commands on turn ON/OFF lamp
 function OnFan(){
@@ -210,12 +169,45 @@ function readTemperature(){
   var tempAndTime = ble.read(connectingDevice.id, simpleCustomService, temperatureCharacteristic, success, failure);
   console.log("READING TEMP AND TIME:")
   console.log(tempAndTime);
-  // var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
-  // graphData.push([timeElapsed, temp_f]);
-  // drawChart(graphData);
+  var temp_read = 0;
+  for(var i = 0; i < tempAndTime.length; i++){
+    temp_read += tempAndTime[i];
+  }
+  temp_read = temp_read/10;
+
+  var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
+  graphData.push([timeElapsed, temp_read]);
+  drawChart(graphData);
   // console.log(graphData);
 }
 
+function changeStrength(){
+    var strength = parseInt(document.getElementById("strengthSelect").value);
+    var onArray= new Uint8Array(1);
+    onArray[0] = strength;
+    //console.log(strength);
+    ble.write(connectingDevice.id, simpleCustomService, rotationStrengthCharacteristic, onArray.buffer, success, failure);
+
+}
+
+function changeTargetTime(){
+    console.log ("Target Value Changed");
+    var targetTemperature = parseFloat(document.getElementById("targetTemp").value);
+    var onArray= targetTemperature.split(".");
+    for(var i = 0; i < onArray.length; i++){
+
+    }
+    var intValue = praseInt (targetTemperature);
+    console.log (intValue);
+    //var decimal = praseInt ((targetTemperature-intValue/1.0) * 100);
+    //console.log(decimal);
+
+    onArray[0] = intValue;
+    onArray[1] = intValue ;
+
+
+    ble.write(connectingDevice.id, simpleCustomService, targetTempCharacteristic, onArray.buffer, success, failure);
+}
 
 
 function deviceDiscovered(device) {
