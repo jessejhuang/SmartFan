@@ -69,7 +69,7 @@
     <ons-page id="deviceDetails">
         <ons-toolbar>
             <div class="left"><ons-back-button>Disconnect</ons-back-button></div>
-            <div class="center">Device Details</div>
+            <div class="center">SmartFan</div>
         </ons-toolbar>
 
         <ons-modal id="connectingModal" animation="fade">
@@ -103,16 +103,15 @@
 
         <p style="margin-top: 25px; text-align: center; display:initial;" >
          <ons-row>
-          <ons-input type="number" id="countDownSecond" modifier="underbar" placeholder="Count Down In" int></ons-input> second
-         </ons-row>
-         <ons-row id="countDownSecondDisplay">
+          <ons-input type="number" id="targetTemp" modifier="underbar" onchange= "changeTargetTime()" value="25.0" float ></ons-input> 
          </ons-row>
          <ons-row>
             <ons-col>
-                <ons-button onclick="onInNTime()">Future Turn On</ons-button>
-            </ons-col>
-            <ons-col>
-                 <ons-button onclick="offInNTime()">Future Turn Off</ons-button>
+                 <select id="strengthSelect"  onchange= "changeStrength()" >
+                    <option selected value="3">High </option>
+                    <option value="2">Medium </option>
+                    <option value="1">Low</option>
+                </select>
             </ons-col>
          </ons-row>
         </p>

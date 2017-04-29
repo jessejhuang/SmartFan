@@ -19,7 +19,7 @@ SYSTEM_MODE(MANUAL);
 // Define a service and its data: The "numbers" are randomly generated from https://www.uuidgenerator.net/
 BLEService tempService("208c9c6f-dcf8-4c1f-8a43-8f1674c21d6e");
 BLECharacteristic fanChangeCharacteristic("a7360086-35eb-405e-8fa9-5060fc4f60e8", ATT_PROPERTY_READ | ATT_PROPERTY_WRITE);
-BLECharacteristic oledDisplayCharacteristic("de356095-f965-4a5f-9418-41a48ea6718d" , ATT_PROPERTY_READ | ATT_PROPERTY_WRITE);
+BLECharacteristic targetTempCharacteristic("de356095-f965-4a5f-9418-41a48ea6718d" , ATT_PROPERTY_READ | ATT_PROPERTY_WRITE);
 // The temperature charactierstic reports temperature in 0.1 deg C.  For example, 0xE6 == 230 (decimal) => 23.00 degrees C
 // (The DS18B20 only is accurate to about +- 0.5 degrees C over typical temperature ranges)
 BLECharacteristic tempCharacteristic("bd4cf86c-f315-4864-9c89-8fb5d01463cf", ATT_PROPERTY_READ | ATT_PROPERTY_NOTIFY, 2,2);
@@ -35,7 +35,7 @@ uint8_t sensorAddress[8];
 
 // Timer to periodically read and update temperature
 void readTemperature();
-void printOnScreen();
+void printOnScreen(int temperature, int decimal);
 Timer tempUpdateTimer(4000, readTemperature);
 
 
@@ -56,6 +56,7 @@ void readTemperature() {
     updateTempCharacteristicValue(sensor.celsius()*10);
     int decimal = (int)((sensor.celsius()-((int)sensor.celsius())/1.0) * 100);
     printOnScreen((int)sensor.celsius(),decimal);
+    smartFan(sensor.celsius());
   } else {
     // Something went wrong
     Serial.println("Sensor Read Failed");
@@ -69,13 +70,28 @@ Servo servo;
 int count =0;
 int toggleFan = 0;
 int currentTemperature = 0;
-int powerIndex = 120;
+int powerIndex = 130;
+int manualMode = 0;
+float targetTemperature = 25.0;
+
+void rotateStrength(int choice) {
+  if (choice == 1){
+    powerIndex = 10;
+  }
+  else if (choice == 2){
+    powerIndex = 80;
+  }
+  else{
+    powerIndex = 130;
+  }
+}
 
 void rotateFan() {
     // publish the event that will trigger our Webhook
     if (count % 2 == 0){
         servo.write(powerIndex);
         count += 1;
+        //Serial.println(powerIndex);
     }
     else{
         servo.write(0);
@@ -83,21 +99,34 @@ void rotateFan() {
     }
 }
 
-void rotateStrength(int choice) {
-  switch (choice) {
-    case 1:
-      {powerIndex = 40;}
-    case 2:
-      {powerIndex = 80;}
-    case 3:
-      {powerIndex = 80;}
-  }
 
+
+
+
+Timer motorTimer(500, rotateFan);
+
+void smartFan(float currentTemp){
+  if (manualMode != 1){
+    //Serial.println(targetTemperature);
+    if (targetTemperature >= currentTemp){
+      if(motorTimer.isActive()){
+        motorTimer.stop();
+      }
+    }
+    else{
+      if(! motorTimer.isActive()){
+        motorTimer.start();
+    }
+  }
+  }
+  else{
+    return;
+  }
 }
 
-
-
-Timer motorTimer(360, rotateFan);
+void changeTargetTemp (int temperature, int decimal){
+   targetTemperature  = temperature/1.0 + decimal/100.0;
+}
 
 void setup() {
   delay(2000);
@@ -120,9 +149,9 @@ void setup() {
   fanChangeCharacteristic.setCallback(fanChangeCallback);
   tempService.addCharacteristic(fanChangeCharacteristic);
   byte oledValue[] = {0,0,0,0};  // One byte for integer value and one for decimal
-  oledDisplayCharacteristic.setValue(oledValue,4);
-  oledDisplayCharacteristic.setCallback(oledChangeCallback);
-  tempService.addCharacteristic(oledDisplayCharacteristic);
+  targetTempCharacteristic.setValue(oledValue,4);
+  targetTempCharacteristic.setCallback(targetTempCallback);
+  tempService.addCharacteristic(targetTempCharacteristic);
   byte strengthValue[] = {0};  // A 1 byte integer value for on or off
   rotationStrengthCharacteristic.setValue(fanValue,1);
   rotationStrengthCharacteristic.setCallback(rotationStrengthCallback);
@@ -171,6 +200,7 @@ void printOnScreen(int temperature, int decimal){
 }
 
 //Callback to change the fan from on too off or vice versa once a value has been written.
+// This is the manual mode that prevents the smart fan function
 void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason reason){
    Serial.print("Fan Change Characteristic; Reason: ");
    Serial.println(reason);
@@ -191,21 +221,22 @@ void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason r
      Serial.println();
 }
 
+
 //Callback to print the current temperature, gotten from the weather api, on screen
-void oledChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason reason){
+void targetTempCallback(BLERecipient recipient, BLECharacteristicCallbackReason reason){
    Serial.print("OLED Change Characteristic; Reason: ");
    Serial.println(reason);
   int commands[] = {-1,-1,-1,-1,-1};
   if(reason == POSTWRITE) {
        byte value[4];
-       int bytes = oledDisplayCharacteristic.getValue(value, 4);
+       int bytes = targetTempCharacteristic.getValue(value, 4);
        Serial.print("New Value written: ");
-       for(int i=0;i<1;i++){
+       for(int i=0;i<2;i++){
          Serial.print(value[i]);
          Serial.print(" ");
          commands[i] = int(value[i]);
        }
-       printOnScreen(commands[0],commands[1]);
+       changeTargetTemp(commands[0],commands[1]);
        
 
      }
@@ -214,12 +245,12 @@ void oledChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason 
 
 //Callback to change the fan from on too off or vice versa once a value has been written.
 void rotationStrengthCallback(BLERecipient recipient, BLECharacteristicCallbackReason reason){
-   Serial.print("Fan Change Characteristic; Reason: ");
+   Serial.print("Rotation Strength Charateristic; Reason: ");
    Serial.println(reason);
   int commands[] = {-1,-1,-1,-1,-1};
   if(reason == POSTWRITE) {
        byte value[4];
-       int bytes = fanChangeCharacteristic.getValue(value, 4);
+       int bytes = rotationStrengthCharacteristic.getValue(value, 4);
        Serial.print("New Value written: ");
        for(int i=0;i<1;i++){
          Serial.print(value[i]);
@@ -230,6 +261,7 @@ void rotationStrengthCallback(BLERecipient recipient, BLECharacteristicCallbackR
      }
      Serial.println();
 }
+
 
 
 //Each call to chance the fan will also control whether the LED screen displays the temperature- the display will not turn on while the fan is running.
