@@ -29,7 +29,7 @@ BLECharacteristic rotationStrengthCharacteristic("11c4156d-2bbb-4c52-8dc0-722d78
 
 // ***** Data and objects for the sensor
 // Assumes the DS18 is connected to D6.
-DS18 sensor(D6);  
+DS18 sensor(D6);
 uint8_t sensorAddress[8];
 
 
@@ -43,8 +43,8 @@ Timer tempUpdateTimer(4000, readTemperature);
 // Updated periodically with a timer, so no "callback" needed.
 void updateTempCharacteristicValue(int newTemp) {
   byte value[2];
-  value[0] = newTemp>>8;
-  value[1] = newTemp>>0;
+  value[0] = (newTemp * 10) - (10 * (int)newTemp);
+  value[1] = (int)newTemp;
   tempCharacteristic.setValue(value, 2);
   tempCharacteristic.sendNotify();
 }
@@ -60,7 +60,7 @@ void readTemperature() {
   } else {
     // Something went wrong
     Serial.println("Sensor Read Failed");
-  }  
+  }
 }
 
 
@@ -107,7 +107,8 @@ Timer motorTimer(500, rotateFan);
 
 void smartFan(float currentTemp){
   if (manualMode != 1){
-    //Serial.println(targetTemperature);
+    Serial.print("It is smart Mode, and target temperature is: ");
+    Serial.println(targetTemperature);
     if (targetTemperature >= currentTemp){
       if(motorTimer.isActive()){
         motorTimer.stop();
@@ -141,7 +142,7 @@ void setup() {
   }
   // Save address & Read the current temperature
   sensor.addr(sensorAddress);
-  readTemperature(); 
+  readTemperature();
 
   Serial.println("Start program");
   byte fanValue[] = {0};  // A 1 byte integer value for on or off
@@ -214,7 +215,20 @@ void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason r
          Serial.print(" ");
          commands[i] = int(value[i]);
          toggleFan ++;
-         changeFanState(toggleFan);
+         if (commands[0] == 189){
+          if (! motorTimer.isActive()){
+            Serial.println("Fan is Off, and will be Kept OFF");
+            motorTimer.stop();
+            manualMode = 1;
+            return;
+          }
+          changeFanState(toggleFan);
+         }
+         else{
+          changeFanState(toggleFan);
+         }
+
+         manualMode = toggleFan % 2;
        }
 
      }
@@ -237,7 +251,7 @@ void targetTempCallback(BLERecipient recipient, BLECharacteristicCallbackReason 
          commands[i] = int(value[i]);
        }
        changeTargetTemp(commands[0],commands[1]);
-       
+
 
      }
      Serial.println();

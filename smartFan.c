@@ -107,6 +107,7 @@ Timer motorTimer(500, rotateFan);
 
 void smartFan(float currentTemp){
   if (manualMode != 1){
+    Serial.print("It is smart Mode, and target temperature is: ");
     Serial.println(targetTemperature);
     if (targetTemperature >= currentTemp){
       if(motorTimer.isActive()){
