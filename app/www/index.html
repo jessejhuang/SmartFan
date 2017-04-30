@@ -90,6 +90,8 @@
     <ons-list-item style="display:initial">
     <p style="margin-top: 30px; text-align: center; display:initial;">ON/OFF Immediately</p>
     <ons-row>
+    </ons-row>
+    <ons-row>
         <ons-col>
         <p style="margin-top: 25px; text-align: center">
             <ons-button onclick="OnFan()">ON</ons-button>
@@ -107,7 +109,10 @@
 
         <p style="margin-top: 25px; text-align: center; display:initial;" >
          <ons-row>
-          <ons-input type="number" id="targetTemp" modifier="underbar" onchange= "changeTargetTime()" value="25.0" float ></ons-input>
+          <ons-input type="number" id="targetTemp" modifier="underbar" value="25" int ></ons-input>
+         </ons-row>
+         <ons-row>
+            <ons-button onclick = "changeTargetTemp()" > Set Target Temp </ons-button>
          </ons-row>
          <ons-row>
             <ons-col>
@@ -121,37 +126,6 @@
         </p>
                 </ons-list-item>
 
-                <ons-list-item>
-                <p style="margin-top: 25px; text-align: center; display:initial;" >
-                <ons-row id="time">
-                </ons-row>
-                <ons-row id="settedTime">
-                </ons-row>
-                <ons-row id="countDownAlarmDisplay">
-                </ons-row>
-                <ons-row>
-                Set Alarm Time
-                </ons-row>
-                <ons-row>
-                <ons-input type="number" id="setHour" modifier="underbar"   placeholder="HH" int></ons-input> hr
-                </ons-row>
-                <ons-row>
-                <ons-input type="number" id="setMinute" modifier="underbar" placeholder="MM" int></ons-input> min
-                </ons-row>
-                <ons-row>
-                <ons-input type="number" id="setSecond" modifier="underbar" placeholder="SS" int></ons-input> s
-                </ons-row>
-                <ons-row>
-                    <ons-col>
-                        <ons-button onclick="alarmOnTime()">Turn On @</ons-button>
-                    </ons-col>
-                    <ons-col>
-                        <ons-button onclick="alarmOffTime()">Turn Off @</ons-button>
-                    </ons-col>
-                </ons-row>
-                </p>
-
-                </ons-list-item>
 
 
             </ons-list>

@@ -17,20 +17,12 @@ var pageNavigator = null;
 var connectingDevice = null;
 var connectionTimeout = null;
 
-var offsetValue = 2;
-var alarmTime = new Date("April 29, 2017 00:00:00").getTime();
-var countDownTime = new Date("April 29, 2017 00:00:00").getTime();
-var alarmCountDown;
-var alarmOn;
-var countDownOn;
-var timerCountDown;
-var timeOnLoad;
 
-var simpleCustomService       = "208c9c6f-dcf8-4c1f-8a43-8f1674c21d6e";
-var fanChangeCharacteristic = "a7360086-35eb-405e-8fa9-5060fc4f60e8";
-var targetTempCharacteristic = "de356095-f965-4a5f-9418-41a48ea6718d";
-var temperatureCharacteristic = "bd4cf86c-f315-4864-9c89-8fb5d01463cf";
-var rotationStrengthCharacteristic = "11c4156d-2bbb-4c52-8dc0-722d789d8e5a";
+var simpleCustomService             = "208c9c6f-dcf8-4c1f-8a43-8f1674c21d6e";
+var fanChangeCharacteristic         = "a7360086-35eb-405e-8fa9-5060fc4f60e8";
+var targetTempCharacteristic        = "de356095-f965-4a5f-9418-41a48ea6718d";
+var temperatureCharacteristic       = "bd4cf86c-f315-4864-9c89-8fb5d01463cf";
+var rotationStrengthCharacteristic  = "11c4156d-2bbb-4c52-8dc0-722d789d8e5a";
 var graphData = [["Time", "Temperature"]];
 // *********   Functions for scanning and scan related events
 
@@ -51,100 +43,6 @@ var failure = function (){
 
 var success = function (){
     console.log("success");
-}
-
-//ensure the time format on the clock;
-function checkTime(i) {
-  if (i < 10) {
-    i = "0" + i;
-  }
-  return i;
-}
-
-function startTime() {
-  var today = new Date();
-  var h = today.getHours();
-  var m = today.getMinutes();
-  var s = today.getSeconds();
-  // add a zero in front of numbers<10
-  m = checkTime(m);
-  s = checkTime(s);
-  document.getElementById('time').innerHTML = "Clock: "+h + ":" + m + ":" + s;
-  t = setTimeout(function() {
-    startTime()
-  }, 500);
-}
-
-function setTimeAlarm(){
-    var hour = parseInt(document.getElementById("setHour").value);
-    var minute = parseInt(document.getElementById("setMinute").value);
-    var second = parseInt(document.getElementById("setSecond").value);
-
-    alarmOn = new Date(alarmTime);
-    alarmOn.setHours(alarmOn.getHours()+hour);
-    alarmOn.setMinutes(alarmOn.getMinutes()+minute);
-    alarmOn.setSeconds(alarmOn.getSeconds()+second);
-
-    var h_on = checkTime(alarmOn.getHours());
-    var m_on = checkTime(alarmOn.getMinutes());
-    var s_on = checkTime(alarmOn.getSeconds());
-    document.getElementById('settedTime').innerHTML = "Alarm On @  "+h_on + ":" + m_on + ":" + s_on;
-}
-
-function setTimeCountDown(){
-    var second = parseInt(document.getElementById("countDownSecond").value);
-    countDownOn = new Date();
-    countDownOn.setSeconds(countDownOn.getSeconds()+second +offsetValue);
-}
-
-function alarmOnTime(){
-
-    setTimeAlarm();
-    // Update the count down every 1 second
-    clearInterval(alarmCountDown);
-    alarmCountDown = setInterval(function() {
-    var now = new Date().getTime();
-    var distance = alarmOn - now;
-    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    var hh = checkTime(hours);
-    var mm = checkTime(minutes);
-    var ss = checkTime(seconds);
-    document.getElementById("countDownAlarmDisplay").innerHTML = "Count Down to Turn On @ " + hh + "h " + mm + "m " + ss + "s ";
-
-    // If the count down is over, write some text
-    if (distance < 0) {
-        clearInterval(alarmCountDown);
-        document.getElementById("countDownAlarmDisplay").innerHTML = "TIME EXPIRED & Light On";
-        //FadeColorOn(); <- Change to temperature
-    }
-}, 1000);
-
-}
-
-function alarmOffTime(){
-
-    setTimeAlarm();
-    // Update the count down every 1 second
-    clearInterval(alarmCountDown);
-    alarmCountDown = setInterval(function() {
-    var now = new Date().getTime();
-    var distance = alarmOn - now;
-    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    document.getElementById("countDownAlarmDisplay").innerHTML = "Count Down to Turn Off @ " + hours + "h " + minutes + "m " + seconds + "s ";
-
-    // If the count down is over, write some text
-    if (distance < 0) {
-        clearInterval(alarmCountDown);
-        document.getElementById("countDownAlarmDisplay").innerHTML = "TIME EXPIRED & Light Off";
-        //FadeColorOff(); <- Change to temperature
-
-    }
-}, 1000);
-
 }
 
 
@@ -173,8 +71,8 @@ function readTemperature(){
 
 function readTempKernel(buffer){
   var tempAndTime = new Uint8Array(buffer);
-  console.log("READING TEMP AND TIME:")
-  console.log(tempAndTime);
+  //console.log("READING TEMP AND TIME:")
+  //console.log(tempAndTime);
   var temp_read = 0;
   for(var i = 0; i < tempAndTime.length; i++){
     temp_read += tempAndTime[i];
@@ -195,23 +93,32 @@ function changeStrength(){
 
 }
 
-function changeTargetTime(){
-    console.log ("Target Value Changed");
-    var targetTemperature = parseFloat(document.getElementById("targetTemp").value);
-    var onArray= targetTemperature.split(".");
+function changeTargetTemp(){
+    console.log ("Target Value Changed IMPORTANT");
+    var targetTemperature = document.getElementById("targetTemp").value;
+    var sendData = new Uint8Array(2);
+    var onArray = targetTemperature.split(".");
     for(var i = 0; i < onArray.length; i++){
-
+        sendData[i] = 0;
+        sendData[i] = praseInt (onArray[i]);
+        console.log(onarray[i]);
+        console.log(sendData[i]);
     }
-    var intValue = praseInt (targetTemperature);
-    console.log (intValue);
-    //var decimal = praseInt ((targetTemperature-intValue/1.0) * 100);
+    sendData[1] = sendData[1] *100
+    // var intValue = praseInt (targetTemperature);
+    //var decimal = praseInt (targetTemperature % 1 * 100);
+    console.log(intValue);
     //console.log(decimal);
 
-    onArray[0] = intValue;
-    onArray[1] = intValue ;
+
+    // var intValue = praseInt (targetTemperature);
+    // console.log (intValue);
+    // //var decimal = praseInt ((targetTemperature-intValue/1.0) * 100);
+    // //console.log(decimal);
 
 
-    ble.write(connectingDevice.id, simpleCustomService, targetTempCharacteristic, onArray.buffer, success, failure);
+
+    ble.write(connectingDevice.id, simpleCustomService, targetTempCharacteristic, sendData.buffer, success, failure);
 }
 
 

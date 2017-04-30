@@ -214,7 +214,20 @@ void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason r
          Serial.print(" ");
          commands[i] = int(value[i]);
          toggleFan ++;
-         changeFanState(toggleFan);
+         if (commands[0] == 189){
+          if (! motorTimer.isActive()){
+            Serial.println("Fan is Off, and will be Kept OFF");
+            motorTimer.stop();
+            manualMode = 1;
+            return;
+          }
+          changeFanState(toggleFan);
+         }
+         else{
+          changeFanState(toggleFan);
+         }
+
+         manualMode = toggleFan % 2;
        }
 
      }
