@@ -226,7 +226,7 @@ void fanChangeCallback(BLERecipient recipient, BLECharacteristicCallbackReason r
          toggleFan ++;
          if (commands[0] == 189){
           if (! motorTimer.isActive()){
-            Serial.println("Fan is Off, and will be Kept OFF");
+            Serial.println("Fan is Off- Switching to Manual mode.");
             motorTimer.stop();
             manualMode = 1;
             return;

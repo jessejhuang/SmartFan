@@ -77,14 +77,15 @@ function readTemperature(){
 //Get current Temperature from the daya buffer, and graph using Google Charts, drawChart() method in chart.js
 function readTempKernel(buffer){
   var tempAndTime = new Uint8Array(buffer);
-  //console.log("READING TEMP AND TIME:")
-  //console.log(tempAndTime);
   var temp_read = 0;
   for(var i = 0; i < tempAndTime.length; i++){
     temp_read += tempAndTime[i];
   }
   temp_read = temp_read/10;
   var timeElapsed = (new Date().getTime() - timeOnLoad)/1000;
+  if(temp_read < 10){
+    temp_read += 25.5;
+  }
   graphData.push([timeElapsed, temp_read]);
   drawChart(graphData);
 }
